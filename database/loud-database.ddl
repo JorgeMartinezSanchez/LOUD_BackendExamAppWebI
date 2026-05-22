@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS content.event (
     id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
     venue_id        UUID        NOT NULL,
     title           VARCHAR(80) NOT NULL,
+    hour_change     TIMESTAMP WITH TIME ZONE,
     starts_at       TIMESTAMP WITH TIME ZONE,
     description     VARCHAR(500),
     min_price       DECIMAL(10, 2),

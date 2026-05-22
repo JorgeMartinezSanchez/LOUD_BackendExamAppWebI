@@ -24,5 +24,13 @@ def get_event(
     db: Session = Depends(get_db)
 ):
     service = EventService(db)
-    
+
     return service.get_event_detail(event_id)
+
+@router.get("/events/{event_id}/price-history")
+def price_history(
+    event_id: UUID,
+    db: Session = Depends(get_db)
+){
+    
+}

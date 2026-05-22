@@ -1,5 +1,7 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
+import datetime
+from datetime import UTC
 from sqlalchemy.orm import Session, joinedload
 from models.models import Event, Venue, TicketType
 from cache.cache_service import cache # type: ignore
@@ -67,6 +69,7 @@ class EventService:
         result = {
             'id': str(event.id),
             'title': event.title,
+            'hour_change': event.hour_change,
             'starts_at': event.starts_at.isoformat() if event.starts_at else None, # type: ignore
             'description': event.description,
             'min_price': float(event.min_price) if event.min_price else None, # type: ignore
@@ -89,6 +92,7 @@ class EventService:
         return {
             'id': str(event.id),
             'title': event.title,
+            'hour_change': event.hour_change,
             'starts_at': event.starts_at.isoformat() if event.starts_at else None,
             'min_price': float(event.min_price) if event.min_price else None,
             'total_capacity': event.total_capacity,
@@ -108,3 +112,7 @@ class EventService:
             'total_capacity': tt.total_capacity,
             'available': tt.available
         }
+    
+    def price_update(self, event: Event) :
+        if (event.hour_change >= datetime.UTC.):
+            query = self.db.query(Event).

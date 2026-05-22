@@ -27,6 +27,7 @@ class Event(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     venue_id = Column(UUID(as_uuid=True), ForeignKey("content.venue.id"), nullable=False)
     title = Column(String(80), nullable=False)
+    hour_change = Column(DateTime(timezone=True))
     starts_at = Column(DateTime(timezone=True))
     description = Column(String(500))
     min_price = Column(Float)
