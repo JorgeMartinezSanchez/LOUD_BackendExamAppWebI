@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, CheckConstraint, Index
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
 
@@ -20,3 +21,6 @@ class Event(Base):
     available = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    venue = relationship("Venue", back_populates="events")
+    ticket_types = relationship("TicketType", back_populates="event", cascade="all, delete-orphan")

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, CheckConstraint, Index
+from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import uuid
 
@@ -15,3 +16,5 @@ class Venue(Base):
     city = Column(String(100), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    events = relationship("Event", back_populates="venue", cascade="all, delete-orphan")

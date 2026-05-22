@@ -5,7 +5,7 @@ from sqlalchemy import func
 from models.event import Event 
 from models.ticket_type import TicketType
 from base_repository import BaseRepository
-from interfaces import IEventRepository
+from repositories.interfaces import IEventRepository
 
 class EventRepository(BaseRepository[Event], IEventRepository):
     """Cumple SRP: solo responsabilidad de acceso a datos de Event"""

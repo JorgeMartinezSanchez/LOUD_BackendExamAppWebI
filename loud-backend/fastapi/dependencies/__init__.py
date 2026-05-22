@@ -5,6 +5,7 @@ from .get_event_service import get_event_service
 from .get_ticket_type_repository import get_ticket_type_repository
 from .get_venue_repository import get_venue_repository
 from .get_order_repository import get_order_repository
+from .get_order_service import get_order_service
 
 __all__ = [
     "get_db_connection",
@@ -16,4 +17,5 @@ __all__ = [
     "get_ticket_type_repository",
     "get_venue_repository",
     "get_order_repository",
+    "get_order_service",
 ]

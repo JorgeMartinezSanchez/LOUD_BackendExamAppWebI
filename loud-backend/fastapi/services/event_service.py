@@ -1,63 +1,94 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
-from fastapi import Depends
 from sqlalchemy.orm import Session
-from core.database import get_db
-from repositories.interfaces import IEventRepository, ITicketTypeRepository
-from repositories.event_repository import EventRepository
-from repositories.ticket_type_repository import TicketTypeRepository
+from models.event import Event
+from models.venue import Venue
+from models.ticket_type import TicketType
 
 class EventService:
-    """
-    Depende de abstracciones (IEventRepository, ITicketTypeRepository),
-    no de implementaciones concretas.
-    """
     
-    def __init__(
-        self,
-        event_repo: IEventRepository,
-        ticket_type_repo: ITicketTypeRepository
-    ):
-        self.event_repo = event_repo
-        self.ticket_type_repo = ticket_type_repo
+    def __init__(self, db: Session):
+        self.db = db
     
     def list_events(self, q: Optional[str], sort: str, page: int, page_size: int) -> Dict[str, Any]:
-        filters = {'q': q, 'sort': sort}
-        offset = (page - 1) * page_size
+        query = self.db.query(Event).join(Venue, Event.venue_id == Venue.id)
         
-        events = self.event_repo.list(filters, page_size, offset)
-        total = self.event_repo.count(filters)
+        if q:
+            query = query.filter(Event.title.ilike(f"%{q}%"))
+        
+        if sort == 'date':
+            query = query.order_by(Event.starts_at.asc())
+        elif sort == 'price':
+            query = query.order_by(Event.min_price.asc())
+        elif sort == 'capacity':
+            query = query.order_by(Event.available.asc())
+        
+        offset = (page - 1) * page_size
+        total = query.count()
+        events = query.offset(offset).limit(page_size).all()
         
         return {
             'count': total,
             'page': page,
-            'results': self._serialize_events(events)
+            'results': [self._serialize_event(e) for e in events]
         }
     
     def get_event_detail(self, event_id: UUID):
-        event = self.event_repo.get_by_id(event_id)
+        event = self.db.query(Event).options(
+            joinedload(Event.venue)
+        ).filter(Event.id == event_id).first()
+        
         if not event:
             return None
         
-        ticket_types = self.ticket_type_repo.list({'event_id': event_id}, 100, 0)
+        ticket_types = self.db.query(TicketType).filter(TicketType.event_id == event_id).all()
         
         return {
-            'id': event.id,
+            'id': str(event.id),
             'title': event.title,
-            'tiers': self._serialize_ticket_types(ticket_types)
+            'starts_at': event.starts_at.isoformat() if event.starts_at is not None else None,
+            'description': event.description,
+            'min_price': float(event.min_price) if event.min_price is not None else None, # type: ignore
+            'total_capacity': event.total_capacity,
+            'available': event.available,
+            'venue': {
+                'id': str(event.venue.id),
+                'name': event.venue.name,
+                'city': event.venue.city
+            } if event.venue else None,
+            'tiers': [self._serialize_ticket_type(tt) for tt in ticket_types]
         }
     
-    def _serialize_events(self, events):
-        # Lógica de serialización
-        pass
+    def _serialize_event(self, event):
+        # Acceder a los valores directamente desde el objeto
+        # SQLAlchemy ya los tiene como atributos normales
+        starts_at = event.starts_at
+        min_price = event.min_price
+        
+        return {
+            'id': str(event.id),
+            'title': event.title,
+            'starts_at': starts_at.isoformat() if starts_at is not None else None,
+            'min_price': float(min_price) if min_price is not None else None,
+            'total_capacity': event.total_capacity,
+            'available': event.available,
+            'venue': {
+                'id': str(event.venue.id),
+                'name': event.venue.name,
+                'city': event.venue.city
+            } if event.venue else None
+        }
     
-    def _serialize_ticket_types(self, ticket_types):
-        # Lógica de serialización
-        pass
+    def _serialize_ticket_type(self, tt):
+        price = tt.price
+        return {
+            'id': str(tt.id),
+            'name': tt.name,
+            'price': float(price) if price is not None else None,
+            'total_capacity': tt.total_capacity,
+            'available': tt.available
+        }
 
-# Factory para inyección de dependencias
-def get_event_service(db: Session = Depends(get_db)) -> EventService:
-    return EventService(
-        event_repo=EventRepository(db),      # Inyectamos implementación concreta
-        ticket_type_repo=TicketTypeRepository(db)  # pero el servicio depende de la interfaz
-    )
+
+# Import needed for joinedload
+from sqlalchemy.orm import joinedload
