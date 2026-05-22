@@ -1,7 +1,7 @@
 from typing import Dict, Any, List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session, joinedload
-from models.ticket import Ticket
+from models.models import Ticket
 from repositories.base_repository import BaseRepository
 from repositories.interfaces import ITicketRepository
 

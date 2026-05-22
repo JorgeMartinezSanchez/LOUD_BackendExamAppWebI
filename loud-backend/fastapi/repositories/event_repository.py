@@ -2,8 +2,7 @@ from typing import Dict, Any, List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func
-from models.event import Event 
-from models.ticket_type import TicketType
+from models.models import Event, TicketType
 from base_repository import BaseRepository
 from repositories.interfaces import IEventRepository
 

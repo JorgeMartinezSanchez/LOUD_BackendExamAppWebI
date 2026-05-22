@@ -1,8 +1,7 @@
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-from models.venue import Venue
-from models.event import Event
+from models.models import Venue, Event
 
 class VenueRepository:
     """Repositorio para venues usando SQLAlchemy"""

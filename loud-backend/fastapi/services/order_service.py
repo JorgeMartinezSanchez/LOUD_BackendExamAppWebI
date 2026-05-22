@@ -1,9 +1,7 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
 from sqlalchemy.orm import Session
-from models.order import Order
-from models.ticket import Ticket
-from models.ticket_type import TicketType
+from models.models import Order, Ticket
 
 class OrderService:
     

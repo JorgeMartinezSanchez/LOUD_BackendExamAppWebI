@@ -1,9 +1,7 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
 from sqlalchemy.orm import Session, joinedload
-from models.event import Event
-from models.venue import Venue
-from models.ticket_type import TicketType
+from models.models import Event, Venue, TicketType
 from cache.cache_service import cache # type: ignore
 
 class EventService:

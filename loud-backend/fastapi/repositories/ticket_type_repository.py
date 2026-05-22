@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import update
-from models.ticket_type import TicketType
+from models.models import TicketType
 from base_repository import BaseRepository
 from repositories.interfaces import ITicketTypeRepository
 

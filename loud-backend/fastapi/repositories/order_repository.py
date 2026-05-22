@@ -2,9 +2,7 @@ from typing import Dict, Any, List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, and_
-from models.order import Order
-from models.ticket import Ticket
-from models.ticket_type import TicketType
+from models.models import Order, TicketType, Ticket
 from repositories.base_repository import BaseRepository
 from repositories.interfaces import IOrderRepository
 
