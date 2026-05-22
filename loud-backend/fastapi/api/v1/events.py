@@ -24,4 +24,5 @@ def get_event(
     db: Session = Depends(get_db)
 ):
     service = EventService(db)
+    
     return service.get_event_detail(event_id)
