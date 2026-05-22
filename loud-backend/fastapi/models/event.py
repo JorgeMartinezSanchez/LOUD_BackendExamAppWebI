@@ -22,5 +22,6 @@ class Event(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    # Estas relaciones se resolverán después de que todos los modelos estén cargados
     venue = relationship("Venue", back_populates="events")
     ticket_types = relationship("TicketType", back_populates="event", cascade="all, delete-orphan")

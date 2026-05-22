@@ -23,4 +23,6 @@ class TicketType(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    tickets = relationship("Ticket", back_populates="ticket_type")
+    # Usar string con el nombre completo
+    tickets = relationship("models.ticket.Ticket", back_populates="ticket_type")
+    event = relationship("models.event.Event", back_populates="ticket_types")
