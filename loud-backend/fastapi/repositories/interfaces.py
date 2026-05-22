@@ -59,3 +59,41 @@ class ITicketTypeRepository(IRepository):
     @abstractmethod
     def increase_availability(self, ticket_type_id: UUID, quantity: int) -> bool:
         pass
+
+# Interfaz para Ticket
+class ITicketRepository(IRepository[T]):
+    @abstractmethod
+    def get_by_order(self, order_id: UUID) -> List[T]:
+        """Obtener todos los tickets de una orden"""
+        pass
+    
+    @abstractmethod
+    def get_by_ticket_type(self, ticket_type_id: UUID) -> List[T]:
+        """Obtener todos los tickets de un tipo"""
+        pass
+    
+    @abstractmethod
+    def create_batch(self, tickets_data: List[Dict[str, Any]]) -> List[T]:
+        """Crear múltiples tickets a la vez"""
+        pass
+
+class IOrderRepository(IRepository[T]):
+    @abstractmethod
+    def get_by_customer_email(self, email: str, limit: int, offset: int) -> List[T]:
+        pass
+    
+    @abstractmethod
+    def get_pending_orders(self) -> List[T]:
+        pass
+    
+    @abstractmethod
+    def update_status(self, order_id: UUID, status: str) -> Optional[T]:
+        pass
+    
+    @abstractmethod
+    def calculate_total(self, order_id: UUID) -> float:
+        pass
+    
+    @abstractmethod
+    def update_total(self, order_id: UUID) -> Optional[T]:  # ← AGREGAR ESTO
+        pass

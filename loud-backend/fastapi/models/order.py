@@ -1,5 +1,6 @@
 from sqlalchemy import Column, String, Integer, Float, DateTime, ForeignKey, CheckConstraint, Index
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 import uuid
@@ -20,3 +21,6 @@ class Order(Base):
     status = Column(String(20), nullable=False, default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     modified_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relaciones
+    tickets = relationship("Ticket", back_populates="order", cascade="all, delete-orphan")
