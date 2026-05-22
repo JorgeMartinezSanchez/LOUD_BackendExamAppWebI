@@ -1,10 +1,9 @@
 from fastapi import FastAPI
-from api.v1 import events, orders
+from api.v1 import events
 
 app = FastAPI(title="LOUD API", version="1.0.0")
 
 app.include_router(events.router)
-app.include_router(orders.router)
 
 @app.get("/")
 def home():

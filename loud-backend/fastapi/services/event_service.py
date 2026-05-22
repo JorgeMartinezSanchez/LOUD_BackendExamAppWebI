@@ -1,9 +1,10 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from models.event import Event
 from models.venue import Venue
 from models.ticket_type import TicketType
+from cache.cache_service import cache # type: ignore
 
 class EventService:
     
@@ -11,6 +12,15 @@ class EventService:
         self.db = db
     
     def list_events(self, q: Optional[str], sort: str, page: int, page_size: int) -> Dict[str, Any]:
+        # Cache key única para esta consulta
+        cache_key = f"events:list:{q}:{sort}:{page}:{page_size}"
+        
+        # Intentar obtener del caché
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        
+        # Si no está en caché, consultar DB
         query = self.db.query(Event).join(Venue, Event.venue_id == Venue.id)
         
         if q:
@@ -27,13 +37,26 @@ class EventService:
         total = query.count()
         events = query.offset(offset).limit(page_size).all()
         
-        return {
+        result = {
             'count': total,
             'page': page,
             'results': [self._serialize_event(e) for e in events]
         }
+        
+        # Guardar en caché (TTL 60 segundos)
+        cache.set(cache_key, result, ttl=60)
+        
+        return result
     
     def get_event_detail(self, event_id: UUID):
+        cache_key = f"events:detail:{event_id}"
+        
+        # Intentar obtener del caché
+        cached = cache.get(cache_key)
+        if cached:
+            return cached
+        
+        # Si no está en caché, consultar DB
         event = self.db.query(Event).options(
             joinedload(Event.venue)
         ).filter(Event.id == event_id).first()
@@ -43,12 +66,12 @@ class EventService:
         
         ticket_types = self.db.query(TicketType).filter(TicketType.event_id == event_id).all()
         
-        return {
+        result = {
             'id': str(event.id),
             'title': event.title,
-            'starts_at': event.starts_at.isoformat() if event.starts_at is not None else None,
+            'starts_at': event.starts_at.isoformat() if event.starts_at else None, # type: ignore
             'description': event.description,
-            'min_price': float(event.min_price) if event.min_price is not None else None, # type: ignore
+            'min_price': float(event.min_price) if event.min_price else None, # type: ignore
             'total_capacity': event.total_capacity,
             'available': event.available,
             'venue': {
@@ -58,18 +81,18 @@ class EventService:
             } if event.venue else None,
             'tiers': [self._serialize_ticket_type(tt) for tt in ticket_types]
         }
+        
+        # Guardar en caché (TTL 60 segundos)
+        cache.set(cache_key, result, ttl=60)
+        
+        return result
     
     def _serialize_event(self, event):
-        # Acceder a los valores directamente desde el objeto
-        # SQLAlchemy ya los tiene como atributos normales
-        starts_at = event.starts_at
-        min_price = event.min_price
-        
         return {
             'id': str(event.id),
             'title': event.title,
-            'starts_at': starts_at.isoformat() if starts_at is not None else None,
-            'min_price': float(min_price) if min_price is not None else None,
+            'starts_at': event.starts_at.isoformat() if event.starts_at else None,
+            'min_price': float(event.min_price) if event.min_price else None,
             'total_capacity': event.total_capacity,
             'available': event.available,
             'venue': {
@@ -80,15 +103,10 @@ class EventService:
         }
     
     def _serialize_ticket_type(self, tt):
-        price = tt.price
         return {
             'id': str(tt.id),
             'name': tt.name,
-            'price': float(price) if price is not None else None,
+            'price': float(tt.price) if tt.price else None,
             'total_capacity': tt.total_capacity,
             'available': tt.available
         }
-
-
-# Import needed for joinedload
-from sqlalchemy.orm import joinedload
