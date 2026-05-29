@@ -1,7 +1,6 @@
 from typing import Optional, Dict, Any
 from uuid import UUID
-import datetime
-from datetime import UTC
+from datetime import datetime, UTC
 from sqlalchemy.orm import Session, joinedload
 from models.models import Event, Venue, TicketType
 from cache.cache_service import cache # type: ignore
@@ -114,5 +113,5 @@ class EventService:
         }
     
     def price_update(self, event: Event) :
-        if (event.hour_change >= datetime.UTC.):
-            query = self.db.query(Event).
+        if event.hour_change >= datetime.now(UTC):
+            query = self.db.query(Event)
